@@ -37,6 +37,8 @@ class _HomePageState extends State<HomePage> {
   ///variables
   final PopupController _popupController = PopupController();
   final MapController mapController = MapController();
+  ///Search controller
+  final TextEditingController _searchController = TextEditingController();
   List<SearchResult> result = [];
   List<Marker> markers = [];
   int pointIndex;
@@ -153,78 +155,110 @@ class _HomePageState extends State<HomePage> {
           print('no data');
         }
         print("length tempMarker is: " + tempMarker.length.toString());
-        return FlutterMap(
-          mapController: mapController,
-          options: MapOptions(
-            center: LatLng(51.5061590, -0.140280),
-            zoom: 10,
-            maxZoom: 20,
-            plugins: [
-              MarkerClusterPlugin(),
-              LocationPlugin(),
-            ],
-            onTap: (_) => _popupController
-                .hidePopup(), // Hide popup when the map is tapped.
-          ),
-          layers: [
-            TileLayerOptions(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
-            ),
-            MarkerClusterLayerOptions(
-              maxClusterRadius: 120,
-              size: Size(40, 40),
-              anchor: AnchorPos.align(AnchorAlign.center),
-              fitBoundsOptions: FitBoundsOptions(
-                padding: EdgeInsets.all(50),
+        return Stack(
+          children: [
+            FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                center: LatLng(51.5061590, -0.140280),
+                zoom: 10,
+                maxZoom: 20,
+                plugins: [
+                  MarkerClusterPlugin(),
+                  LocationPlugin(),
+                ],
+                onTap: (_) => _popupController
+                    .hidePopup(), // Hide popup when the map is tapped.
               ),
-              markers: tempMarker.isEmpty
+              layers: [
+                TileLayerOptions(
+                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  subdomains: ['a', 'b', 'c'],
+                ),
+                MarkerClusterLayerOptions(
+                  maxClusterRadius: 120,
+                  size: Size(40, 40),
+                  anchor: AnchorPos.align(AnchorAlign.center),
+                  fitBoundsOptions: FitBoundsOptions(
+                    padding: EdgeInsets.all(50),
+                  ),
+                  markers: tempMarker.isEmpty
                   ? [
-                      Marker(
-                          point: LatLng(51.5145160, -0.1270060),
-                          builder: (context) => Icon(Icons.pin_drop))
-                    ]
-                  : tempMarker,
-              polygonOptions: PolygonOptions(
-                  borderColor: Colors.blueAccent,
-                  color: Colors.black12,
-                  borderStrokeWidth: 3),
-              popupOptions: PopupOptions(
-                popupSnap: PopupSnap.markerTop,
-                popupController: _popupController,
-                popupBuilder: (_, marker) => Container(
-                  width: 200,
-                  height: 100,
-                  color: Colors.white,
-                  child: GestureDetector(
-                    onTap: () => debugPrint('Popup tap!'),
-                    child: Text(
-                      'Container popup for marker at ${marker.point}',
+                  Marker(
+                      point: LatLng(51.5145160, -0.1270060),
+                      builder: (context) => Icon(Icons.pin_drop))
+                  ]
+                      : tempMarker,
+                  polygonOptions: PolygonOptions(
+                      borderColor: Colors.blueAccent,
+                      color: Colors.black12,
+                      borderStrokeWidth: 3),
+                  popupOptions: PopupOptions(
+                    popupSnap: PopupSnap.markerTop,
+                    popupController: _popupController,
+                    popupBuilder: (_, marker) => Container(
+                      width: 200,
+                      height: 100,
+                      color: Colors.white,
+                      child: GestureDetector(
+                        onTap: () => debugPrint('Popup tap!'),
+                        child: Text(
+                          'Container popup for marker at ${marker.point}',
+                        ),
+                      ),
                     ),
+                  ),
+                  builder: (context, markers) {
+                    return FloatingActionButton(
+                      onPressed: null,
+                      child: Text(markers.length.toString()),
+                    );
+                  },
+                ),
+              ],
+              nonRotatedLayers: <LayerOptions>[
+                LocationOptions(
+                  locationButton(),
+                  onLocationUpdate: (LatLngData ld) {
+                    //   print(
+                    //       'Location updated: ${ld?.location} (accuracy: ${ld?.accuracy})');
+                  },
+                  onLocationRequested: (LatLngData ld) {
+                    if (ld == null) {
+                      return;
+                    }
+                    mapController.move(ld.location, 16.0);
+                  },
+                )
+              ],
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 30.0,left: 10.0,right: 10.0),
+              alignment: Alignment.topCenter,
+              child: TextField(
+                controller: _searchController,
+                enabled: false,
+                style: TextStyle(fontSize: 16.0, color: Color(0xFFbdc6cf)),
+                decoration: InputDecoration(
+                  filled: true,
+                  contentPadding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(),
+                  hintText: 'Tìm kiếm địa điểm...',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.black45,
                   ),
                 ),
               ),
-              builder: (context, markers) {
-                return FloatingActionButton(
-                  onPressed: null,
-                  child: Text(markers.length.toString()),
-                );
-              },
-            ),
-          ],
-          nonRotatedLayers: <LayerOptions>[
-            LocationOptions(
-              locationButton(),
-              onLocationUpdate: (LatLngData ld) {
-                //   print(
-                //       'Location updated: ${ld?.location} (accuracy: ${ld?.accuracy})');
-              },
-              onLocationRequested: (LatLngData ld) {
-                if (ld == null) {
-                  return;
-                }
-                mapController.move(ld.location, 16.0);
-              },
             )
           ],
         );
