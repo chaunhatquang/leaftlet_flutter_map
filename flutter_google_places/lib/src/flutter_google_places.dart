@@ -45,7 +45,7 @@ class PlacesAutocompleteWidget extends StatefulWidget {
   PlacesAutocompleteWidget({
     required this.apiKey,
     this.mode = Mode.fullscreen,
-    this.hint = "Search",
+    this.hint = 'Nhập địa chỉ...',
     this.overlayBorderRadius,
     this.offset,
     this.location,
@@ -127,8 +127,8 @@ class _PlacesAutocompleteOverlayState extends PlacesAutocompleteState {
               ),
               Expanded(
                   child: Padding(
-                child: _textField(context),
                 padding: const EdgeInsets.only(right: 8.0),
+                child: _textField(context),
               )),
             ],
           )),
@@ -327,20 +327,23 @@ class _AppBarPlacesAutoCompleteTextFieldState
 
 class PoweredByGoogleImage extends StatelessWidget {
   final _poweredByGoogleWhite =
-      "packages/flutter_google_places/assets/google_white.png";
+      "packages/flutter_google_places/assets/logo_HueS.png";
   final _poweredByGoogleBlack =
-      "packages/flutter_google_places/assets/google_black.png";
+      "packages/flutter_google_places/assets/logo_HueS.png";
 
   @override
   Widget build(BuildContext context) {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+      Text('Powered by'),
       Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(10.0),
           child: Image.asset(
             Theme.of(context).brightness == Brightness.light
                 ? _poweredByGoogleWhite
                 : _poweredByGoogleBlack,
-            scale: 2.5,
+            fit: BoxFit.cover,
+            width: 30.0,
+            height: 20.0,
           ))
     ]);
   }
@@ -498,7 +501,7 @@ class PlacesAutocomplete {
     required BuildContext context,
     required String apiKey,
     Mode mode = Mode.fullscreen,
-    String hint = "Search",
+    String hint = "Nhập địa chỉ...",
     BorderRadius? overlayBorderRadius,
     num? offset,
     Location? location,
